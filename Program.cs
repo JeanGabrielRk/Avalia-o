@@ -25,8 +25,7 @@ app.MapGet("/gabriel/api/funcionario/listar", ([FromServices] AppDataContext ctx
     return Results.NotFound();
 });
 
-
-app.MapPost("/gabriel/api/folha/cadastrar", ([FromBody] Folha folha, [FromServices] AppDataContext ctx) => 
+app.MapPost("/gabriel/api/folha/cadastrar", async ([FromBody] Folha folha, [FromServices] AppDataContext ctx) => 
 {
     double salarioBruto = folha.quantidade * folha.valor;
     double impostoIrrf = CalculoIrrf(salarioBruto);
@@ -41,10 +40,9 @@ app.MapPost("/gabriel/api/folha/cadastrar", ([FromBody] Folha folha, [FromServic
     folha.salarioLiquido = salarioLiquido;
 
     ctx.Folha.Add(folha);
-    ctx.SaveChangesAsync();
+    await ctx.SaveChangesAsync();
     return Results.Created("", folha);
 });
-
 
 double CalculoIrrf(double salarioBruto)
 {
@@ -79,22 +77,37 @@ double CalculoInns(double salarioBruto)
     return 621.03; 
 }
 
-app.MapGet("/gabriel/folha/listar", ([FromServices] AppDataContext ctx) => 
+app.MapGet("/gabriel/api/folha/listar", ([FromServices] AppDataContext ctx) => 
 {
-    if(ctx.Folha.Any())
+    var folhas = ctx.Folha.ToList(); 
+
+    if (folhas.Any())
     {
-        return Results.Ok(ctx.Folha.ToList());
+        return Results.Ok(folhas); 
     }
-    return Results.NotFound();
+
+    return Results.NotFound(); 
 });
+
 
 app.MapGet("/gabriel/folha/buscar/{cpf}/{mes}/{ano}", ([FromRoute] string cpf, [FromRoute] int mes, [FromRoute] int ano, [FromServices] AppDataContext ctx) => 
 {
-    Folha? folha = ctx.Folha.Find(cpf);
-    if(folha is null)
+    
+    var funcionario = ctx.Funcionarios.FirstOrDefault(f => f.cpf == cpf);
+    
+    if (funcionario == null)
+    {
+        return Results.NotFound("Funcionário não encontrado.");
+    }
+
+    var folha = ctx.Folha
+        .FirstOrDefault(f => f.funcionarioId == funcionario.funcionarioId && f.mes == mes && f.ano == ano);
+
+    if (folha == null)
     {
         return Results.NotFound();
     }
+
     return Results.Ok(folha);
 });
 
