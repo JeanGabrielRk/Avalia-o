@@ -8,17 +8,26 @@ var app = builder.Build();
 
 app.MapGet("/", () => "AVALIAÇÃO DEV VISUAL");
 
-app.MapPost("/gabriel/funcionario/cadastrar", ([FromBody] Funcionario funcionario, [FromServices] AppDataContext ctx) => 
+app.MapPost("/gabriel/api/funcionario/cadastrar", ([FromBody] Funcionario funcionario, [FromServices] AppDataContext ctx) => 
 {
     ctx.Funcionarios.Add(funcionario);
     ctx.SaveChanges();
     return Results.Created("", funcionario);
 });
 
-app.MapPost("/gabriel/folha/cadastrar", ([FromBody] Folha folha, [FromServices] AppDataContext ctx) => 
+app.MapGet("/gabriel/api/funcionario/listar", ([FromServices] AppDataContext ctx) => 
 {
-   if(ctx.Folha.Any()){
+    var funcionarios = ctx.Funcionarios.ToList();
+    if (funcionarios.Any())
+    {
+        return Results.Ok(funcionarios);
+    }
+    return Results.NotFound();
+});
 
+
+app.MapPost("/gabriel/api/folha/cadastrar", ([FromBody] Folha folha, [FromServices] AppDataContext ctx) => 
+{
     double salarioBruto = folha.quantidade * folha.valor;
     double impostoIrrf = CalculoIrrf(salarioBruto);
     double impostoInss = CalculoInns(salarioBruto);
@@ -34,10 +43,8 @@ app.MapPost("/gabriel/folha/cadastrar", ([FromBody] Folha folha, [FromServices] 
     ctx.Folha.Add(folha);
     ctx.SaveChangesAsync();
     return Results.Created("", folha);
-   }    
-
-   return Results.NotFound();
 });
+
 
 double CalculoIrrf(double salarioBruto)
 {
@@ -75,15 +82,6 @@ double CalculoInns(double salarioBruto)
 app.MapGet("/gabriel/folha/listar", ([FromServices] AppDataContext ctx) => 
 {
     if(ctx.Folha.Any())
-    {
-        return Results.Ok(ctx.Folha.ToList());
-    }
-    return Results.NotFound();
-});
-
-app.MapGet("/gabriel/funcionario/listar", ([FromServices] AppDataContext ctx) => 
-{
-    if(ctx.Funcionarios.Any())
     {
         return Results.Ok(ctx.Folha.ToList());
     }

@@ -132,3 +132,4 @@ C:\Avaliação\Jean\Gabriel\obj\Debug\net8.0\refint\Gabriel.dll
 C:\Avaliação\Jean\Gabriel\obj\Debug\net8.0\Gabriel.pdb
 C:\Avaliação\Jean\Gabriel\obj\Debug\net8.0\Gabriel.genruntimeconfig.cache
 C:\Avaliação\Jean\Gabriel\obj\Debug\net8.0\ref\Gabriel.dll
+C:\Avaliação\Jean\Gabriel\obj\Debug\net8.0\Gabriel.sourcelink.json
